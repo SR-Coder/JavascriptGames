@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>A Pong Style Game</title>
+    <style>
+        canvas{
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            background: transparent;
+            border: solid black 2px;
+        }
+        #background {
+            z-index: -2;
+        }
+        #main {
+            z-index: -1;
+        }
+        #paddle {
+            z-index: 0;
+        }
+    </style>
+    <link rel="stylesheet" href="./static/style.css">
+</head>
+
+<!-- <body onload="init()"> -->
+    <body>
+    <div class="wrapper">
+        <!-- this is for the background -->
+        <canvas id="background" width="600" height="360">
+            your browser does not suppoet canvas
+        </canvas>
+        <canvas id="main" width="600" height="360">
+
+        </canvas>
+        <!-- this canvas is going to be for the paddle -->
+        <canvas id="paddle" width="600" height="360">
+
+        </canvas>
+        <!-- this is the canvas for the opponant paddle -->
+        <canvas id="oppaddle" width="600" height="360">
+
+        </canvas>
+    </div>
+    <script src="./pong.js"></script>
+</body>
+
+</html>
