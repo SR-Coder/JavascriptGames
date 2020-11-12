@@ -13,9 +13,10 @@ var imageRepository = new function () {
 	this.background = new Image();
 	this.paddle = new Image();
 	this.opPaddle = new Image();
+	this.ball = new Image();
 
 	//Ensures all images have been loaded before starting the game
-	var numImages = 3;
+	var numImages = 4;
 	var numLoaded = 0;
 	function imageLoaded() {
 		numLoaded++;
@@ -32,11 +33,15 @@ var imageRepository = new function () {
 	this.opPaddle.onload = function() {
 		imageLoaded();
 	}
+	this.ball.onload = function() {
+		imageLoaded();
+	}
 
 	// Set images src
 	this.background.src = "static/bg.png";
 	this.paddle.src = "static/Padle.png";
 	this.opPaddle.src = "static/Padle.png";
+	this.ball.src = "static/ball.png";
 }
 
 function Drawable() {
@@ -105,21 +110,82 @@ function Paddle() {
 			this.draw();
 		}
 	};
+	
 };
 Paddle.prototype = new Drawable();
 
 function OpPaddle(){
-	this.speed = 6;
+	this.speed = 1;
 	var counter = 0;
-
+	var direction = "up"
 	this.draw = function () {
 		this.context.drawImage(imageRepository.opPaddle, this.x, this.y);
 	};
 	this.move = function(){
+		this.context.clearRect(this.x, this.y, this.width, this.height)
+		if (this.y > 1 && this.y < 10){
+			direction = "down"
+
+		} else if (this.y < 310 && this.y > 300) {
+			direction = "up"
+		}
+
+		if (direction == "up"){
+			this.y -= this.speed;
+		} else if (direction =="down") {
+			this.y += this.speed;
+		}
+
 		this.draw();
 	};
 };
 OpPaddle.prototype = new Drawable();
+
+function Ball() {
+	this.speed = 4;
+	this.dy = 0;
+	this.dx = 1;
+	this.direction = true;
+	
+	this.draw = function() {
+		this.context.drawImage(imageRepository.ball, this.x, this.y);
+	};
+	this.move = function() {
+		this.context.clearRect(this.x, this.y, this.width, this.height)
+		this.x += this.dx;
+		this.y += this.dy
+
+		if (this.y > 340 || this.y < 0) {
+			this.dy = -(this.dy)
+		}
+
+		if (this.x > 580) {
+			this.dx = -(this.dx)
+		}
+		
+		if (this.x < 40 ) {
+			var paddleLoc = detectPosition();
+			var pbDiff = (10+this.y - paddleLoc)-30
+			// console.log(pbDiff, this.x, this.y)
+			var mult = 6
+			if (this.y > paddleLoc -10 && this.y < paddleLoc +50 ) {
+				
+				// this.dx = -1*((Math.abs(1/pbDiff)*4)*6)
+				// console.log((Math.abs(1/pbDiff)*10)*6)
+				// this.dy =  Math.abs(pbDiff) 
+			}
+			
+		} 
+		var pad = detectPosition()
+		// console.log(this.y - pad)
+		this.draw();
+	}
+}
+
+Ball.prototype = new Drawable();
+
+
+
 
 
 function Game() {
@@ -128,11 +194,13 @@ function Game() {
 		this.paddleCanvas = document.getElementById('paddle');
 		this.mainCanvas = document.getElementById("main");
 		this.opPaddleCanvas = document.getElementById("oppaddle");
+		this.ballCanvas = document.getElementById("ball");
 		if (this.bgCanvas.getContext) {
 			this.bgContext = this.bgCanvas.getContext('2d');
 			this.paddleContext = this.paddleCanvas.getContext('2d');
 			this.mainContext = this.mainCanvas.getContext('2d');
 			this.opPaddleContext = this.opPaddleCanvas.getContext('2d');
+			this.ballContext = this.ballCanvas.getContext('2d');
 
 
 			Background.prototype.context = this.bgContext;
@@ -147,21 +215,30 @@ function Game() {
 			OpPaddle.prototype.canvasWidth = this.opPaddleCanvas.width;
 			OpPaddle.prototype.canvasHeight = this.opPaddleCanvas.height;
 
+			Ball.prototype.context = this.ballContext;
+			Ball.prototype.canvasWidth = this.ballCanvas.width;
+			Ball.prototype.canvasHeight = this.ballCanvas.height;
+
 			this.background = new Background();
 			this.background.init(0, 0);
 
 			this.paddle = new Paddle();
 			var paddleStartX = 10;
-			var paddleStartY = 60;
+			var paddleStartY = 150;
 
 			this.oppaddle = new OpPaddle();
 			var opPaddleStartX = 590 - imageRepository.opPaddle.width;
 			var opPaddleStartY = 180;
 
+			this.playerBall = new Ball();
+			var ballStartX = 300;
+			var ballStartY = 175;
+
 			this.paddle.init(paddleStartX, paddleStartY, imageRepository.paddle.width, imageRepository.paddle.height);
 
 			this.oppaddle.init(opPaddleStartX, opPaddleStartY, imageRepository.opPaddle.width, imageRepository.opPaddle.height);
 
+			this.playerBall.init(ballStartX, ballStartY, imageRepository.ball.width , imageRepository.ball.height );
 
 			return true;
 		} else {
@@ -171,6 +248,7 @@ function Game() {
 	this.start = function () {
 		this.paddle.draw();
 		this.oppaddle.draw();
+		this.playerBall.draw();
 		animate();
 	}
 }
@@ -179,6 +257,13 @@ function animate() {
 	requestAnimationFrame(animate);
 	game.background.draw();
 	game.paddle.move();
+	game.oppaddle.move();
+	game.playerBall.move();
+	
+}
+
+function detectPosition () {
+	return(game.paddle.y)
 }
 
 
