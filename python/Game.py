@@ -13,12 +13,20 @@ from pygame.locals import(
 pygame.init()
 
 # define some constants
-screenWidth = 1200
-screenHeight = 800
+screenWidth = 400
+screenHeight = 1200
 ballRadius = 75
 startPos =100
+drec = 1
 V = 0
+
+# Physical Constants
 Accel = 9.8
+br = ballRadius/1000
+CA = 3.14*(br*br) # Crossectional Area
+Cd = .5 # Coeficient of Drag
+p = 1.225 # Density of air STP
+m = 20 # mass of the ball.
 
 FRAME_RATE = 4
 TIME_STEP = 1 / FRAME_RATE
@@ -27,13 +35,16 @@ screen = pygame.display.set_mode([screenWidth,screenHeight])
 
 
 def nextPosition(s, v, time):
-    nextPos = s + v * time
+    nextPos = round(s + v * time,0)
     # print(f'next position ---> {nextPos}')
     return nextPos
 
 def nextVelocity(v, a, time):
-    nextVelo = v + a * time
+    windResistance = (.5*p*(v*v)*Cd*CA)/m
+    A = a - (windResistance * drec)
+    nextVelo = v + A * time
     print(f'next velo ---> {nextVelo}, {v} , {a} ')
+    print(f'Wind Resistance ---> {windResistance} {CA}')
     nextVelo = round(nextVelo,2)
     return nextVelo
 
@@ -53,8 +64,9 @@ while running:
     next_y = nextPosition(startPos, V, TIME_STEP)
 
     # Will the ball hit the floor?
-    if next_y + ballRadius > 800:
+    if next_y + ballRadius > screenHeight:
         V = round((-V * .750),1)
+        drec = -drec
     
     # compute the next steps
     startPos = nextPosition(startPos, V, TIME_STEP)
