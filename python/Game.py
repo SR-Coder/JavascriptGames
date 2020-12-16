@@ -1,4 +1,4 @@
-import pygame, time
+import pygame, time, sys, os
 
 from pygame.locals import(
     K_UP,
@@ -23,12 +23,13 @@ V = 0
 # Physical Constants
 Accel = 9.8
 br = ballRadius/1000
-CA = 3.14*(br*br) # Crossectional Area
-Cd = .5 # Coeficient of Drag
-p = 1.225 # Density of air STP
-m = 20 # mass of the ball.
+CA = 3.14*(br*br)           # Crossectional Area
+Cd = .5                     # Coeficient of Drag
+p = 1.225                   # Density of air STP
+m = 20                      # mass of the ball.
+ba = .85                    # ball efficiency
 
-FRAME_RATE = 4
+FRAME_RATE = 10
 TIME_STEP = 1 / FRAME_RATE
 
 screen = pygame.display.set_mode([screenWidth,screenHeight])
@@ -45,8 +46,15 @@ def nextVelocity(v, a, time):
     nextVelo = v + A * time
     print(f'next velo ---> {nextVelo}, {v} , {a} ')
     print(f'Wind Resistance ---> {windResistance} {CA}')
-    nextVelo = round(nextVelo,2)
+    nextVelo = round(nextVelo,10)
     return nextVelo
+
+# Key Controls
+def reset(k):
+    global startPos
+    if k[K_DOWN]:
+        startPos = 100
+    
 
 # this is the game loop.
 running = True
@@ -55,6 +63,7 @@ while running:
         if event.type == pygame.QUIT:
             running = False
     
+    keys = pygame.key.get_pressed()
     my_timer = pygame.time.get_ticks()/1000
     screen.fill((255,255,255))
     pygame.draw.circle(screen, (0,0,255), (250,startPos), ballRadius)
@@ -65,7 +74,7 @@ while running:
 
     # Will the ball hit the floor?
     if next_y + ballRadius > screenHeight:
-        V = round((-V * .750),1)
+        V = round((-V * ba),1)
         drec = -drec
     
     # compute the next steps
@@ -73,6 +82,8 @@ while running:
     print(f'next pos ---> {startPos}')
     V = nextVelocity(V, 9.8, TIME_STEP)
     print(f'next velocity ---> {V}')
+    
+    reset(keys)
 
     # print(my_timer)
 
